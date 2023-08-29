@@ -1,4 +1,4 @@
-FROM node:14-alpine
+FROM node:16.20.2
 WORKDIR /app
 RUN  yarn global add pm2
 RUN pm2 install pm2-logrotate
