@@ -1,0 +1,53 @@
+name: dev-ci
+
+on:
+  push:
+    branches:
+      - dev
+  
+
+jobs:
+  Build-Push-Commit:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ap-south-1
+
+            - name: Login to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v1           
+
+
+
+            - uses: actions/checkout@v3
+            - name: Set env
+              run: echo "GITHUB_BRANCH=$(echo $GITHUB_SHA)" >> $GITHUB_ENV
+
+            - name: Build the Docker image And Pushing in GitOps
+              run: |
+                  docker build -t  697581818967.dkr.ecr.ap-south-1.amazonaws.com/public-surnames-name-api-dev:$GITHUB_SHA .
+
+                  docker push 697581818967.dkr.ecr.ap-south-1.amazonaws.com/public-surnames-name-api-dev:$GITHUB_SHA 
+
+                  git clone https://${{ secrets.AWS_GITHUB_USER }}:${{ secrets.AWS_GITHUB_TOKEN }}@github.com/kutumbh/imeuswe-gitops
+
+                  cd imeuswe-gitops
+
+                  git checkout dev
+
+                  git config user.name "$GITHUB_ACTOR"
+
+                  git config user.email "$GITHUB_ACTOR@sptr.co"
+
+                  yq e '.spec.template.spec.containers[0].image = "697581818967.dkr.ecr.ap-south-1.amazonaws.com/public-surnames-name-api:${{ env.GITHUB_BRANCH }}"' -i deployment.apps/public-surnames-names-api.yaml
+
+                  git add .
+
+                  git commit -m "updating newer image."
+
+                  git push --set-upstream origin dev
