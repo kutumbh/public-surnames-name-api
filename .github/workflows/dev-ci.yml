@@ -30,9 +30,9 @@ jobs:
 
             - name: Build the Docker image And Pushing in GitOps
               run: |
-                  docker build -t  697581818967.dkr.ecr.ap-south-1.amazonaws.com/public-surnames-name-api-dev:$GITHUB_SHA .
+                  docker build -t  697581818967.dkr.ecr.ap-south-1.amazonaws.com/imeuswe-public-surnames-names-api-dev:$GITHUB_SHA .
 
-                  docker push 697581818967.dkr.ecr.ap-south-1.amazonaws.com/public-surnames-name-api-dev:$GITHUB_SHA 
+                  docker push 697581818967.dkr.ecr.ap-south-1.amazonaws.com/imeuswe-public-surnames-names-api-dev:$GITHUB_SHA 
 
                   git clone https://${{ secrets.AWS_GITHUB_USER }}:${{ secrets.AWS_GITHUB_TOKEN }}@github.com/kutumbh/imeuswe-gitops
 
@@ -44,7 +44,7 @@ jobs:
 
                   git config user.email "$GITHUB_ACTOR@sptr.co"
 
-                  yq e '.spec.template.spec.containers[0].image = "697581818967.dkr.ecr.ap-south-1.amazonaws.com/public-surnames-name-api:${{ env.GITHUB_BRANCH }}"' -i deployment.apps/public-surnames-names-api.yaml
+                  yq e '.spec.template.spec.containers[0].image = "697581818967.dkr.ecr.ap-south-1.amazonaws.com/imeuswe-public-surnames-names-api-dev:${{ env.GITHUB_BRANCH }}"' -i deployment.apps/public-surnames-names-api.yaml
 
                   git add .
 
