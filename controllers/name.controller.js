@@ -13,7 +13,7 @@ const _ = require("lodash");
 require("dotenv").config();
 const s3 = new aws.S3();
 
-// create a Name ak
+// create a Name ganesh
 exports.getNames = async(req, res) => {
   try {
       const name  = req.body.name;
