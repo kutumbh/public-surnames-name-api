@@ -1,0 +1,7 @@
+apps:
+  - script: "index.js"
+    name: "Imeuswe Framework --port 3006"
+    watch: false
+    exec_mode: "cluster"
+    env: 
+      NODE_ENV: "dev"

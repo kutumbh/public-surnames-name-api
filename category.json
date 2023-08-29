@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "type": "CATEGORY",
+        "value": "deathNews"
+    },
+    {
+        "id": 2,
+        "type": "CATEGORY",
+        "value": "indiaElectoralList"
+    },
+    {
+        "id": 3,
+        "type": "CATEGORY",
+        "value": "indiaTelephoneDirectory"
+    },
+    {
+        "id": 4,
+        "type": "CATEGORY",
+        "value": "other"
+    }
+]
