@@ -23,7 +23,7 @@ router.get("/getAllSurnameDownload", surnameController.getAllSurnameDownload
 );
 router.post('/fileuploadSurname/:id/:excelfile',surnameController.fileuploading);
 router.post('/getDropDownMasterInSurname',surnameController.getDropDownMasterInSurname);
-//router.post('/getSurnameFilter',surnameController.getSurnameFilter);
+router.post('/getSurnameFilter',surnameController.getSurnameFilter);
 router.get('/getSurnameById/:_id',surnameController.getSurnameById);
 router.post('/updateSurnameStatusVerified',surnameController.updateSurnameStatusVerified);
 router.get('/countAndUpdatedSurnames',surnameController.countAndUpdatedSurnames);
