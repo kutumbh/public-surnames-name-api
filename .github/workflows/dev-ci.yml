@@ -44,7 +44,7 @@ jobs:
 
                   git config user.email "$GITHUB_ACTOR@sptr.co"
 
-                  yq e '.spec.template.spec.containers[0].image = "697581818967.dkr.ecr.ap-south-1.amazonaws.com/imeuswe-public-surnames-names-api-dev:${{ env.GITHUB_BRANCH }}"' -i deployment.apps/public-surnames-names-api.yaml
+                  yq e '.spec.template.spec.containers[0].image = "697581818967.dkr.ecr.ap-south-1.amazonaws.com/imeuswe-public-surnames-names-api-dev:${{ env.GITHUB_BRANCH }}"' -i deployment.apps/pd-ns-api.yaml
 
                   git add .
 
