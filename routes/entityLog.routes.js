@@ -8,5 +8,4 @@ router.get(
     entityLog.getEntityLogById
 );
 
-
 module.exports = router;
