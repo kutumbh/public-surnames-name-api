@@ -3,6 +3,8 @@ const EntityLogModel=require('../models/entityLog.model')
 const religionModel = require('../models/religion.model')
 const communityModel = require('../models/community.model')
 const scriptModel = require('../models/script.model')
+const pdUser=require('../models/pdUser.model')
+const surnameDetailsModel=require('../models/surnamedetails.model')
 const mongoose = require('mongoose')
 const ObjectsToCsv = require('objects-to-csv');
 const aws = require('aws-sdk')
@@ -19,11 +21,11 @@ const s3 = new aws.S3()
 exports.createSurname = async ({ body }, res) => {
     try {
         // const name = new namesModel(body)
-        const surnames = await surnamesModel.findOne({ surname: body.Surname });
+        const surnames = await surnamesModel.findOne({ surname: body.surname });
         console.log(surnames)
         if (surnames) {
             res.status(404).send({
-                message: 'Data Already Present, Please Update Translation field!'
+                message: 'Data Already Present'
             })
         } else {
             const surnames = new surnamesModel(body)
@@ -232,11 +234,12 @@ exports.updateSurnameForm = async ({ params, body }, res) => {
                 wikiUrl: body.wikiUrl,
                 sStatus: body.sStatus,
                 assignTo: body.assignTo,
-                isPublished: body.isPublished
+                isPublished: body.isPublished,
+                modifiedBy:body.modifiedBy
             };
-            console.log(data)
+            
             const updatedData = await surnamesModel.findByIdAndUpdate({ _id: _id }, data, { new: true });
-            console.log(updatedData)
+            
             if (!updatedData) {
                 return res.status(404).send({ message: 'No Data found' });
             }
@@ -273,7 +276,8 @@ exports.updateSurnameForm = async ({ params, body }, res) => {
             const newEntityLogEntry = new EntityLogModel({
                 refURL: body.refURL,
                 comment: body.comment,
-                surnameId:_id
+                surnameId:_id,
+                modifiedBy:body.modifiedBy
             });
             const createdEntityLogEntry = await newEntityLogEntry.save();
 
@@ -3273,24 +3277,22 @@ exports.getDropDownMasterInSurname = async (req, res) => {
 exports.getSurnameById = async (req, res) => {
     try {
         const _id = req.params._id;
-        console.log("id:", _id)
-        const getSurname = await surnamesModel.findOne({ _id: _id }).populate('assignTo')
-        console.log(getSurname)
+        const getSurname = await surnamesModel.findOne({ _id: _id }).populate('assignTo').populate('modifiedBy')
         
             if (getSurname) {
                 // Modify the sStatus property
                 if (getSurname.sStatus === 'SN') {
                     getSurname.sStatus = 'New';
                 } else if (getSurname.sStatus === 'SV') {
-                    getSurname.sStatus = 'For Updated';
+                    getSurname.sStatus = 'For Review';
                 } else if (getSurname.sStatus === 'SS') {
-                    getSurname.sStatus = 'Submitted';
+                    getSurname.sStatus = 'Verified';
                 }
 
                 if(getSurname.isPublished==="Y"){
-                    getSurname.isPublished='Yes'
+                    getSurname.isPublished='Published'
                 }else if(getSurname.isPublished==="N"){
-                    getSurname.isPublished='No'
+                    getSurname.isPublished='Not Published'
                 }else if(getSurname.isPublished==="B"){
                     getSurname.isPublished='Block'
                 }            
@@ -3387,3 +3389,182 @@ exports.getDropDownMasterInweekOfYear = async (req, res) => {
         res.status(400).send(e);
     }
 }
+exports.getTranslations = async (req, res) => {
+    try {     
+            const getTranslations = await surnamesModel.find().distinct('translations');
+            if (getTranslations) {
+                res.status(200).send(getTranslations)
+            } else {
+                res.status(404).send({
+                    message: "No Data Found!"
+                })
+            }
+        }   
+    catch (e) {
+        res.status(400).send(e);
+    }
+}
+exports.getDropDownMasterInAssignTo = async (req, res) => {
+    try {
+        // Find distinct 'assignTo' values
+        const distinctAssignToValues = await surnamesModel.distinct('assignTo');
+        console.log(distinctAssignToValues);
+    
+        let users = [];
+    
+        if (distinctAssignToValues.includes(null)) {
+            users.push(null);
+        }
+        if (distinctAssignToValues !== null) {
+            users = users.concat(await pdUser.find({ _id: { $in: distinctAssignToValues } }));
+        }
+        console.log(users)
+    
+        if (users.length > 0) {
+            res.status(200).send(users);
+        } else {
+            res.status(404).send({
+                message: "No User Data Found!"
+            });
+        }
+    } catch (e) {
+        console.log(e);
+        res.status(400).send(e);
+    }
+}
+
+
+
+
+
+exports.getSurnameDetails = async (req, res) => {
+    try {
+        const lastName = req.body.lastName;
+
+        const data = await surnameDetailsModel.find({ "lastName": lastName });
+
+        if (data.length === 0) {
+            res.status(404).send({
+                message: `No data found for lastName: ${lastName}`
+            })
+        }
+        else{
+        const count=data[0].count;
+        const placeData = data[0].place;
+        const categoryData = data[0].categoryCount;
+
+        placeData.sort((firstItem, secondItem) => secondItem.count - firstItem.count);
+        categoryData.sort((firstItem, secondItem) => secondItem.count - firstItem.count);
+        // Filter and process placeData to get state-wise counts
+        const stateCounts = placeData.map(place => {
+            return {
+                state: place._id,
+                count: place.count
+            };
+        });
+
+        // Process categoryData to get source-wise counts
+        const sourceCounts = categoryData.map(category => {
+            return {
+                source: category._id,
+                count: category.count
+            };
+        });
+
+
+        res.status(200).json({count,stateCounts, sourceCounts });
+    }
+    } catch (e) {
+        console.log(e)
+        res.status(500).json({ error: e.message });
+    }
+};
+exports.updateSurnameAssignTo = async ({ params, body }, res) => {
+    try {
+
+        const ecode = params.ecode;
+        
+            const data = {
+                sStatus: body.sStatus,
+                assignTo: body.assignTo
+            };
+            
+
+            const updatedData = await surnamesModel.findOneAndUpdate({surname:ecode}, data, { new: true });
+
+            if (!updatedData) {
+                return res.status(404).send({ message: 'No Data found' });
+            }
+           
+    
+
+            res.status(200).send({ updatedData });
+        }
+        // Action: Submit
+      catch (e) {
+    console.error(e);
+    res.status(400).send(e);
+}
+}
+
+exports.updateSurnameStatus = async ({ params, body }, res) => {
+    try {
+
+        const id= params._id;
+        
+            const data = {
+                sStatus: body.sStatus,
+                assignTo: body.assignTo,
+                isPublished:body.isPublished,
+                pd_count:body.pd_count
+
+            };
+            
+
+            const updatedData = await surnamesModel.findByIdAndUpdate({"_id":id}, data, { new: true });
+            
+            if (!updatedData) {
+                return res.status(404).send({ message: 'No Data found' });
+            }
+            const updatedWeekData = await surnamesModel.findByIdAndUpdate(
+                { _id: id },
+                [
+                {
+                  $addFields: {
+                    yearPart: { $year: "$updatedAt" },
+                    weekPart: { $week: "$updatedAt" }
+                  }
+                },
+                {
+                  $addFields: {
+                    weekOfYear: { $concat: [ { $toString: "$yearPart" }, { $toString: "$weekPart" } ] }
+                  }
+                },
+                {
+                  $addFields: {
+                    weekOfYearInt: { $toInt: "$weekOfYear" }
+                  }
+                },
+                {
+                  $set: {
+                    weekOfYear: "$weekOfYearInt"
+                  }
+                },
+                {
+                  $unset: ["yearPart", "weekPart", "weekOfYearInt"]
+                }
+              ]);
+
+           
+    
+
+            res.status(200).send({ updatedData });
+        }
+        // Action: Submit
+      catch (e) {
+    console.error(e);
+    res.status(400).send(e);
+}
+}
+
+

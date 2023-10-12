@@ -20,6 +20,8 @@ var cors = require("cors");
 
 const name = require("./routes/name.routes");
 const surname = require("./routes/surname.routes");
+const dataSearchFilter = require("./routes/dataSearchFilter.routes");
+const entityLog=require("./routes/entityLog.routes")
 
 
 // Import API Routes
@@ -57,6 +59,8 @@ app.use((req, res, next) => {
 
 app.use(name);
 app.use(surname);
+app.use(dataSearchFilter);
+app.use(entityLog)
 
 
 app.use(
