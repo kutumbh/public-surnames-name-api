@@ -273,6 +273,7 @@ exports.updateSurnameForm = async ({ params, body }, res) => {
               ]);
 
             // Create a new record in the EntityLog collection
+            if(body.saveData===true){
             const newEntityLogEntry = new EntityLogModel({
                 refURL: body.refURL,
                 comment: body.comment,
@@ -282,6 +283,10 @@ exports.updateSurnameForm = async ({ params, body }, res) => {
             const createdEntityLogEntry = await newEntityLogEntry.save();
 
             res.status(200).send({ updatedData, createdEntityLogEntry });
+            }
+            else{
+                res.status(200).send({ updatedData });
+            }
         }
     
     else {
