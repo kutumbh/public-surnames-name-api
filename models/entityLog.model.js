@@ -18,6 +18,10 @@ comment:{
 surnameId:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "surname",
+},
+modifiedBy:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "pdUser",
 }},
 
 

@@ -23,7 +23,10 @@ router.put(
     "/updateSurnameForm/:_id",
     surnameController.updateSurnameForm
 );
-router.delete("/deleteSurname/:_id", authMiddleware.Validate,
+// router.delete("/deleteSurname/:_id", authMiddleware.Validate,
+// surnameController.deleteSurname
+// );
+router.delete("/deleteSurname/:_id",
 surnameController.deleteSurname
 );
 router.get("/getAllSurnameDownload", surnameController.getAllSurnameDownload
