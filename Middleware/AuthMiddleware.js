@@ -1,6 +1,7 @@
 console.log("Middleware Loaded");
 const userModel = require("../models/user.model");
 // pull aws config from env file
+// 
 const poolData = {
   UserPoolId: config.aws.cognito.pool_id,
   ClientId: config.aws.cognito.client_id,
