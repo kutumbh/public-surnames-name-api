@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const { integer } = require('sharp/lib/is')
+const pdUser = require('./pdUser.model');
 const surnameSchema = new mongoose.Schema(
   {
     surname: {
@@ -96,10 +96,10 @@ const surnameSchema = new mongoose.Schema(
       type:String,
       trim:true
     },    
-    assignTo:{
+    assignTo:[{
       type: mongoose.Schema.Types.ObjectId,
       ref: "pdUser",
-    },
+    }],
     weekOfYear:{
       type:Number,
     },
@@ -118,6 +118,13 @@ const surnameSchema = new mongoose.Schema(
     }],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "pdUser",
+      required: false,
+      default: null
+    },
+    modifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "pdUser",
       required: false,
       default: null
     }
