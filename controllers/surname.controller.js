@@ -3521,7 +3521,9 @@ exports.updateSurnameStatus = async ({ params, body }, res) => {
                 sStatus: body.sStatus,
                 assignTo: body.assignTo,
                 isPublished:body.isPublished,
-                pd_count:body.pd_count
+                pd_count:body.pd_count,
+                religion:body.religion,
+                script:body.script
 
             };
             

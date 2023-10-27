@@ -346,7 +346,10 @@ conditions.forEach((condition) => {
                 surname: 1,
                 sStatus: 1,          
                 weekOfYear: 1,
-                assignTo: "$assignTo.fname",
+                assignTo: {
+                  _id: "$assignTo._id",
+                  fname: "$assignTo.fname"
+                },
                 pd_count:1,
                 updatedAt:1,
                 isPublished:1
