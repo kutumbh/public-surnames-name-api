@@ -3281,8 +3281,8 @@ exports.getDropDownMasterInSurname = async (req, res) => {
 
 exports.getSurnameById = async (req, res) => {
     try {
-        const _id = req.params._id;
-        const getSurname = await surnamesModel.findOne({ _id: _id }).populate('assignTo').populate('modifiedBy')
+        const surname = req.params.surname;
+        const getSurname = await surnamesModel.findOne({ surname: surname }).populate('assignTo').populate('modifiedBy')
         
             if (getSurname) {
                 // Modify the sStatus property
@@ -3521,9 +3521,7 @@ exports.updateSurnameStatus = async ({ params, body }, res) => {
                 sStatus: body.sStatus,
                 assignTo: body.assignTo,
                 isPublished:body.isPublished,
-                pd_count:body.pd_count,
-                religion:body.religion,
-                script:body.script
+                pd_count:body.pd_count
 
             };
             

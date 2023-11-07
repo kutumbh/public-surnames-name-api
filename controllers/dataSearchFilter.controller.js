@@ -144,11 +144,6 @@ exports.getSearchFilterData = async (req, res) => {
                       //   maxExpansions: 256,
                       // },
                   },
-                  {
-                    autocomplete: {
-                      query: searchText,
-                      path: "community", }
-                  }
                 ]
               }
           }
