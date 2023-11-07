@@ -34,7 +34,7 @@ router.get("/getAllSurnameDownload", surnameController.getAllSurnameDownload
 router.post('/fileuploadSurname/:id/:excelfile',surnameController.fileuploading);
 router.post('/getDropDownMasterInSurname',surnameController.getDropDownMasterInSurname);
 router.post('/getSurnameFilter',surnameController.getSurnameFilter);
-router.get('/getSurnameById/:_id',surnameController.getSurnameById);
+router.get('/getSurnameById/:surname',surnameController.getSurnameById);
 router.post('/updateSurnameStatusVerified',surnameController.updateSurnameStatusVerified);
 router.get('/countAndUpdatedSurnames',surnameController.countAndUpdatedSurnames);
 router.get('/get_snlist_DropDownReligion',surnameController.getDropDownMasterInReligion);
