@@ -103,7 +103,7 @@ exports.getSearchFilterData = async (req, res) => {
     const itemsPerPage = parseInt(req.query.itemsPerPage) || 10;
     const religions = req.body.religion || [];
     const scripts = req.body.script || [];
-    const searchText = req.body.searchText || "";
+    const searchText = req.body.searchText.toUpperCase() || "";
     const sStatuss = req.body.sStatus || [];
     const assignTo = req.body.assignTo || [];
     const weekOfYear = req.body.weekOfYear || [];
@@ -129,7 +129,7 @@ exports.getSearchFilterData = async (req, res) => {
     const aggregationPipeline=[];
     const statematchCondition = {};
     if (searchText!=="") {
-      aggregationPipeline.unshift({
+      aggregationPipeline.unshift({        
           $search: {
               index: "fuzzy3",
               compound: {
@@ -144,10 +144,23 @@ exports.getSearchFilterData = async (req, res) => {
                       //   maxExpansions: 256,
                       // },
                   },
+                  // {
+                  //   autocomplete: {
+                  //     query: searchText,
+                  //     path: "alternative", },
+                      
+                  // },
                 ]
               }
           }
       });
+      aggregationPipeline.push({
+      $match: {
+            $or: [
+              { surname: searchText },
+              { alternative: { $in: [searchText] } }
+            ]
+          }})
   }
   let sortField = null;
     const matchConditions = {};
@@ -379,9 +392,9 @@ exports.getCountsOfSurname = async (req, res) => {
     const assignTo = req.body.assignTo||[];
     const sStatus = req.body.sStatus||[];
     const weekOfYear=req.body.weekOfYear||[];
-    const searchText = req.body.searchText || "";
+    const searchText = req.body.searchText.toUpperCase() || "";
     const dynamic_search=req.body.dynamic_search||""
-
+    
     if (
       religion.length === 0 &&
       script.length === 0 &&
@@ -413,15 +426,24 @@ exports.getCountsOfSurname = async (req, res) => {
                       //   maxExpansions: 256,
                       // },
                   },
-                  {
-                    autocomplete: {
-                      query: searchText,
-                      path: "community", }
-                  }
+                  // {
+                  //   autocomplete: {
+                  //     query: searchText,
+                  //     path: "community", }
+                  // }
                 ]
               }
           }
       });
+      aggregationPipeline.push({
+        
+        $match: {
+          $or: [
+            { surname: searchText },
+            { alternative: { $in: [searchText] } }
+          ]
+        }
+      })
   }
     if (religion.length > 0) {
       aggregationPipeline.push({ $unwind: "$religion" });
