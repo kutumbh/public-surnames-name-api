@@ -130,38 +130,43 @@ exports.getSearchFilterData = async (req, res) => {
     const aggregationPipeline=[];
     const statematchCondition = {};
     if (searchText!=="") {
-      aggregationPipeline.unshift({        
-          $search: {
-              index: "fuzzy3",
-              compound: {
-                should: [
-                   {
-                    autocomplete: {
-                      query: searchText,
-                      path: "surname", },
-                      // fuzzy: {
-                      //   prefixLength: 1,
-                      //   maxEdits: 1,
-                      //   maxExpansions: 256,
-                      // },
-                  },
-                  // {
-                  //   autocomplete: {
-                  //     query: searchText,
-                  //     path: "alternative", },
-                      
-                  // },
-                ]
-              }
-          }
-      });
+      // aggregationPipeline.unshift({        
+      //   $search: {
+      //     index: "fuzzy3",
+      //     compound: {
+      //       should: [
+      //         {
+      //           autocomplete: {
+      //             query: searchText,
+      //             path: "surname",
+      //           },
+      //         },
+      //         {
+      //           autocomplete: {
+      //             query: searchText,
+      //             path: "alternative",
+      //           },
+      //         }
+      //       ],
+      //     },
+      //   }
+      // },
       aggregationPipeline.push({
-      $match: {
-            $or: [
-              { surname: searchText },
-              { alternative: { $in: [searchText] } }
-            ]
-          }})
+        $match: {
+              $or: [
+                { surname: searchText },
+                { alternative: { $in: [searchText] } }
+              ]
+            }})
+    
+    
+      // aggregationPipeline.push({
+      // $match: {
+      //       $or: [
+      //         { surname: searchText },
+      //         { alternative: { $in: [searchText] } }
+      //       ]
+      //     }})
   }
   let sortField = null;
     const matchConditions = {};
