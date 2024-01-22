@@ -2470,3 +2470,145 @@ exports.updateNameStatusVerified = async (req, res) => {
       res.status(400).json(e.message);
     }
   };
+
+
+  exports.updateNameForm = async ({ params, body }, res) => {
+    try {
+
+        const _id = params._id;
+        console.log("id:", _id)
+        if (body.action === 'save') {
+            const data = {
+                name: body.name,
+                // type: body.type,
+                tags: body.tags,
+                religion: body.religion,
+                // kuldevtaFamilyDeity: body.kuldevtaFamilyDeity,
+                 gender: body.gender,
+                // script: body.script,
+                // alternative: body.alternative,
+                meaning: body.meaning,
+                history: body.history,
+                // wikiUrl: body.wikiUrl,
+                nStatusStatus: body.nStatus,
+                assignTo: body.assignTo,
+                isPublished: body.isPublished
+            };
+            
+
+            const updatedData = await namesModel.findByIdAndUpdate({ _id: _id }, data, { new: true });
+
+            if (!updatedData) {
+                return res.status(404).send({ message: 'No Data found' });
+            }
+           
+    const updatedWeekData = await namesModel.updateOne(
+        { _id: _id },
+        [
+        {
+          $addFields: {
+            yearPart: { $year: "$updatedAt" },
+            weekPart: { $week: "$updatedAt" }
+          }
+        },
+        {
+          $addFields: {
+            weekOfYear: { $concat: [ { $toString: "$yearPart" }, { $toString: "$weekPart" } ] }
+          }
+        },
+        {
+          $addFields: {
+            weekOfYearInt: { $toInt: "$weekOfYear" }
+          }
+        },
+        {
+          $set: {
+            weekOfYear: "$weekOfYearInt"
+          }
+        },
+        {
+          $unset: ["yearPart", "weekPart", "weekOfYearInt"]
+        }
+      ]);
+
+            res.status(200).send({ updatedData });
+        }
+        // Action: Submit
+        else if (body.action === 'submit') {
+            // Update in the surnamesModel collection
+            const data = {
+                name: body.name,
+                tags: body.tags,
+                religion: body.religion,
+                // kuldevtaFamilyDeity: body.kuldevtaFamilyDeity,
+                gender: body.gender,
+                // script: body.script,
+                // alternative: body.alternative,
+                meaning: body.meaning,
+                // history: body.history,
+                // wikiUrl: body.wikiUrl,
+                nStatus: body.nStatus,
+                assignTo: body.assignTo,
+                isPublished: body.isPublished,
+                modifiedBy:body.modifiedBy
+            };
+            
+            const updatedData = await namesModel.findByIdAndUpdate({ _id: _id }, data, { new: true });
+            
+            if (!updatedData) {
+                return res.status(404).send({ message: 'No Data found' });
+            }
+            const updatedWeekData = await namesModel.updateOne(
+                { _id: _id },
+                [
+                {
+                  $addFields: {
+                    yearPart: { $year: "$updatedAt" },
+                    weekPart: { $week: "$updatedAt" }
+                  }
+                },
+                {
+                  $addFields: {
+                    weekOfYear: { $concat: [ { $toString: "$yearPart" }, { $toString: "$weekPart" } ] }
+                  }
+                },
+                {
+                  $addFields: {
+                    weekOfYearInt: { $toInt: "$weekOfYear" }
+                  }
+                },
+                {
+                  $set: {
+                    weekOfYear: "$weekOfYearInt"
+                  }
+                },
+                {
+                  $unset: ["yearPart", "weekPart", "weekOfYearInt"]
+                }
+              ]);
+
+            // Create a new record in the EntityLog collection
+            if(body.saveData===true){
+            const newEntityLogEntry = new EntityLogModel({
+                refURL: body.refURL,
+                comment: body.comment,
+                surnameId:_id,
+                modifiedBy:body.modifiedBy
+            });
+            const createdEntityLogEntry = await newEntityLogEntry.save();
+
+            res.status(200).send({ updatedData, createdEntityLogEntry });
+            }
+            else{
+                res.status(200).send({ updatedData });
+            }
+        }
+    
+    else {
+        res.status(400).send({ message: 'Invalid action' });
+    }
+} catch (e) {
+    console.error(e);
+    res.status(400).send(e);
+}
+}

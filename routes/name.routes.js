@@ -38,5 +38,9 @@ router.get('/getNamesById/:_id', nameController.getNamesById);
 router.get('/getAllTags', nameController.getAllTags);
 router.post('/updateNameStatusVerified', nameController.updateNameStatusVerified);
 router.post('/getNames', nameController.getNames);
+router.put(
+    "/updateNameForm/:_id",
+    nameController.updateNameForm
+);
 
 module.exports = router;
