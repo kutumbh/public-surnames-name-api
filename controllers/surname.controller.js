@@ -311,17 +311,18 @@ exports.deleteSurname = async (req, res) => {
   try {
     const _id = req.params._id;
     console.log("Delete Surname id", _id);
-    const surname = await surnamesModel.remove({ _id: _id });
+    const surname = await surnamesModel.findByIdAndDelete({ _id: _id });
     if (surname) {
       res
         .status(201)
-        .send({ message: "Surname Deleted Successfully", surname });
+        .send({ message: "Surname Deleted Successfully" });
     } else {
       res.status(404).send({
         message: "Data not found!",
       });
     }
   } catch (e) {
+    console.log(e)
     res.status(400).send(e);
   }
 };
