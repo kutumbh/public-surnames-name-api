@@ -358,6 +358,7 @@ conditions.forEach((condition) => {
                 religion: 1,
                 script: 1,
                 surname: 1,
+                rank:1,
                 sStatus: 1,          
                 weekOfYear: 1,
                 assignTo: {
