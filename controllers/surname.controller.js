@@ -170,7 +170,8 @@ exports.updateSurnameForm = async ({ params, body }, res) => {
     if (body.action === "save") {
       const data = {
         surname: body.surname,
-        type: body.type,
+        surnameType: body.type,
+        value:body.value,
         community: body.community,
         religion: body.religion,
         kuldevtaFamilyDeity: body.kuldevtaFamilyDeity,
@@ -233,6 +234,8 @@ exports.updateSurnameForm = async ({ params, body }, res) => {
         surname: body.surname,
         community: body.community,
         religion: body.religion,
+        surnameType: body.type,
+        value:body.value,
         kuldevtaFamilyDeity: body.kuldevtaFamilyDeity,
         gotra: body.gotra,
         script: body.script,
