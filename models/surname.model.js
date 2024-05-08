@@ -60,10 +60,18 @@ const surnameSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    type:[{
-      sType: String,
-      sValue: String,
-    }],
+    // type:[{
+    //   sType: String,
+    //   sValue: String,
+    // }],
+    surnameType:{
+      type:String,
+      trim:true
+    },
+    value:{
+      type:String,
+      trim:true
+    },
     // profession:{
     //   type: String,
     //   trim: true,
