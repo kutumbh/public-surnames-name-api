@@ -316,7 +316,7 @@ conditions.forEach((condition) => {
             surname: 1,
           },
         },
-      ]).limit(50000)
+      ]).limit(10000)
       // console.log('surname print',surnameFilter)
       if (surnameFilter.length > 0) {
         const matchedLastNames = surnameFilter.map((entry) => entry.surname);     
