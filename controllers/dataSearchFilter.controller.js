@@ -1,5 +1,6 @@
 const surnamesModel = require("../models/surname.model");
-const surnameDetailsModel=require("../models/surnamedetails.model")
+const surnameDetailsModel=require("../models/surnamedetails.model");
+const surnamesstates1Model=require("../models/surnamesstates1.model");
 const religionModel = require("../models/religion.model");
 const communityModel = require("../models/community.model");
 const scriptModel = require("../models/script.model");
@@ -285,7 +286,7 @@ conditions.forEach((condition) => {
     } 
      if (field === 'state') {
       if (operator === '=') {
-        statematchCondition['place._id'] = { $regex: new RegExp(`${value}`, 'i') };
+        statematchCondition['states.stateCode'] = { $regex: new RegExp(`${value}`, 'i') };
       }
     }
      if (field === 'place count') {
@@ -305,19 +306,21 @@ conditions.forEach((condition) => {
 });
     } 
     if (Object.keys(statematchCondition).length > 0){
-      const surnameFilter = await surnameDetailsModel.aggregate([
+      const surnameFilter = await surnamesstates1Model.aggregate([
         {
           $match: statematchCondition,
         },
         {
           $project: {
             _id: 0,
-            lastName: 1,
+            surname: 1,
           },
         },
-      ])
+      ]).limit(50000)
+      // console.log('surname print',surnameFilter)
       if (surnameFilter.length > 0) {
-        const matchedLastNames = surnameFilter.map((entry) => entry.lastName);      
+        const matchedLastNames = surnameFilter.map((entry) => entry.surname);     
+        // console.log(matchedLastNames) 
         aggregationPipeline.push({
           $match: {
             surname: { $in: matchedLastNames }
