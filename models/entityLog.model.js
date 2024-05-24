@@ -19,6 +19,14 @@ surnameId:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "surname",
 },
+nameId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "name",
+},
+FamousPersonId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ptUser",
+},
 modifiedBy:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "pdUser",
