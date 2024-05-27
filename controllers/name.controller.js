@@ -2592,7 +2592,7 @@ exports.updateNameStatusVerified = async (req, res) => {
             const newEntityLogEntry = new EntityLogModel({
                 refURL: body.refURL,
                 comment: body.comment,
-                surnameId:_id,
+                nameId:_id,
                 modifiedBy:body.modifiedBy
             });
             const createdEntityLogEntry = await newEntityLogEntry.save();

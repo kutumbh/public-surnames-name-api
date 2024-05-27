@@ -7,5 +7,9 @@ router.get(
     "/get_snlist_LogById/:_id",
     entityLog.getEntityLogById
 );
+router.post(
+    "/createEntityLogForFamousPerson",
+    entityLog.createEntityLogForFamousPerson
+);
 
 module.exports = router;

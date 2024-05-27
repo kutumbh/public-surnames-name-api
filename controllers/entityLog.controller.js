@@ -3,7 +3,11 @@ const EntityLogModel = require('../models/entityLog.model')
 exports.getEntityLogById = async(req, res) => {
     try {
         const _id = req.params._id;
-        const getEntityLogById  = await EntityLogModel.find({surnameId:_id}).populate({
+        const getEntityLogById  = await EntityLogModel.find({$or: [
+            { surnameId: _id },
+            { nameId: _id },
+            { FamousPersonId: _id }
+          ]}).populate({
             path: 'modifiedBy',
             model: 'pdUser',
             select: 'fname lname'
@@ -19,5 +23,20 @@ exports.getEntityLogById = async(req, res) => {
         res.status(400).send(e)
     }
 }
+exports.createEntityLogForFamousPerson =async(req,res)=>{
+    try{
+        const newEntityLogEntry = new EntityLogModel({
+            refURL: req.body.refURL,
+            comment: req.body.comment,
+            FamousPersonId:req.body.FamousPersonId,
+            modifiedBy:req.body.modifiedBy
+        });
+        const createdEntityLogEntry = await newEntityLogEntry.save();
+        res.status(200).send(createdEntityLogEntry);
 
+    }catch(error){
+        console.log(error)
+        res.status(400).send(error);
+    }
+}
 
