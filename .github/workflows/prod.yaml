@@ -38,7 +38,7 @@ jobs:
 
                   cd imeuswe-gitops
 
-                  git checkout dev
+                  git checkout dev2
 
                   git config user.name "$GITHUB_ACTOR"
 
@@ -50,4 +50,4 @@ jobs:
 
                   git commit -m "updating newer image."
 
-                  git push --set-upstream origin dev
+                  git push --set-upstream origin dev2
