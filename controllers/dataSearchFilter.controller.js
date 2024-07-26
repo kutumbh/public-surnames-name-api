@@ -180,7 +180,7 @@ exports.getSearchFilterData = async (req, res) => {
       matchConditions.script = { $in: scripts };
     }
     if (sStatuss.length > 0) {
-      if(sStatuss.includes("SN")||sStatuss.includes("SV")||sStatuss.includes("SS")){
+      if(sStatuss.includes("SN")||sStatuss.includes("SV")||sStatuss.includes("SS")||sStatuss.includes("ST")){
       matchConditions.sStatus = { $in: sStatuss };
       }
       if(sStatuss.includes('Y')||sStatuss.includes('N')||sStatuss.includes('B')){
