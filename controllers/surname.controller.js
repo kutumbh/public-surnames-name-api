@@ -3464,10 +3464,10 @@ exports.getSurnameById = async (req, res) => {
       } else if (getSurname.sStatus === "SS") {
         getSurname.sStatus = "Verified";
       }else if(getSurname.sStatus === "CU"){
-        getSurname.sStatus = "Content Updation";
+        getSurname.sStatus = "Content Updated";
       }else if(getSurname.sStatus === "ST"){
-        getSurname.sStatus = "Updation Required";  
-      }
+        getSurname.sStatus = "Require updation";  
+      } 
 
       if (getSurname.isPublished === "Y") {
         getSurname.isPublished = "Published";
