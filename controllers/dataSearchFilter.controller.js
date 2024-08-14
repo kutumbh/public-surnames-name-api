@@ -335,6 +335,13 @@ conditions.forEach((condition) => {
         },
       });
     }
+    if (sortField === "rank") {
+      aggregationPipeline.push({
+        $sort: {
+          rank: 1,
+        },
+      });
+    }
     const countPipeline = [
       ...aggregationPipeline, 
       {
