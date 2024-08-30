@@ -25,12 +25,7 @@ exports.getEntityLogById = async(req, res) => {
 }
 exports.createEntityLogForFamousPerson =async(req,res)=>{
     try{
-        const newEntityLogEntry = new EntityLogModel({
-            refURL: req.body.refURL,
-            comment: req.body.comment,
-            FamousPersonId:req.body.FamousPersonId,
-            modifiedBy:req.body.modifiedBy
-        });
+        const newEntityLogEntry = new EntityLogModel(req.body);
         const createdEntityLogEntry = await newEntityLogEntry.save();
         res.status(200).send(createdEntityLogEntry);
 
