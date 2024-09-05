@@ -180,7 +180,7 @@ exports.getSearchFilterData = async (req, res) => {
       matchConditions.script = { $in: scripts };
     }
     if (sStatuss.length > 0) {
-      if(sStatuss.includes("SN")||sStatuss.includes("SV")||sStatuss.includes("SS")||sStatuss.includes("ST")){
+      if(sStatuss.includes("SN")||sStatuss.includes("SV")||sStatuss.includes("SS")||sStatuss.includes("ST")||sStatuss.includes("CU")){
       matchConditions.sStatus = { $in: sStatuss };
       }
       if(sStatuss.includes('Y')||sStatuss.includes('N')||sStatuss.includes('B')){
@@ -332,6 +332,13 @@ conditions.forEach((condition) => {
       aggregationPipeline.push({
         $sort: {
           pd_count: -1,
+        },
+      });
+    }
+    if (sortField === "rank") {
+      aggregationPipeline.push({
+        $sort: {
+          rank: 1,
         },
       });
     }
