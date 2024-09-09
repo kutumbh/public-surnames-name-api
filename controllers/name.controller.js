@@ -185,25 +185,25 @@ exports.updateNames = async ({ params, body }, res) => {
   }
 };
 
-exports.updateNameForm = async ({ params, body }, res) => {
-  try {
-    console.log("---" + body);
-    const _id = params._id;
-    console.log("id:" + _id);
-    const updateNameData = await namesModel.findByIdAndUpdate(
-      { _id: _id },
-      body,
-      { new: true }
-    );
-    if (updateNameData) {
-      res.status(201).send(updateNameData);
-    } else {
-      res.status(404).send({ message: "No Data found" });
-    }
-  } catch (e) {
-    res.status(400).send(e);
-  }
-};
+// exports.updateNameForm = async ({ params, body }, res) => {
+//   try {
+//     console.log("---" + body);
+//     const _id = params._id;
+//     console.log("id:" + _id);
+//     const updateNameData = await namesModel.findByIdAndUpdate(
+//       { _id: _id },
+//       body,
+//       { new: true }
+//     );
+//     if (updateNameData) {
+//       res.status(201).send(updateNameData);
+//     } else {
+//       res.status(404).send({ message: "No Data found" });
+//     }
+//   } catch (e) {
+//     res.status(400).send(e);
+//   }
+// };
 
 exports.deleteName = async (req, res) => {
   try {
