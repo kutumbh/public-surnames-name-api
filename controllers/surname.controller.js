@@ -3525,47 +3525,59 @@ exports.countAndUpdatedSurnames = async (req, res) => {
   }
 };
 
-exports.getDropDownMasterInReligion = async (req, res) => {
-  try {
-    const getReligion = await surnamesModel.find().distinct("religion");
-    if (getReligion) {
-      res.status(200).send(getReligion);
-    } else {
-      res.status(404).send({
-        message: "No Data Found!",
-      });
-    }
-  } catch (e) {
-    res.status(400).send(e);
-  }
+exports.getDropDownMasterInReligion = async (req, res) => {  
+  try {  
+    const getReligion = await surnamesModel.find().distinct("religion");  
+    
+    // Replace null values with "NIL"  
+    const formattedReligion = getReligion.map(religion => religion === null || religion === "" ? "NIL" : religion);  
+    
+    // If the resulting array is empty, add "NIL"  
+    if (formattedReligion.length === 0) {  
+      formattedReligion.push("NIL");  
+    }  
+
+    res.status(200).send(formattedReligion);  
+    
+  } catch (e) {  
+    res.status(400).send(e);  
+  }  
 };
-exports.getDropDownMasterInScript = async (req, res) => {
-  try {
-    const getScript = await surnamesModel.find().distinct("script");
-    if (getScript) {
-      res.status(200).send(getScript);
-    } else {
-      res.status(404).send({
-        message: "No Data Found!",
-      });
-    }
-  } catch (e) {
-    res.status(400).send(e);
-  }
+exports.getDropDownMasterInScript = async (req, res) => {  
+  try {  
+    const getScript = await surnamesModel.find().distinct("script");  
+    
+    // Replace null values with "NIL"  
+    const formattedScript = getScript.map(script => script === null || script === "" ? "NIL" : script);  
+    
+    // If the resulting array is empty, add "NIL"  
+    if (formattedScript.length === 0) {  
+      formattedScript.push("NIL");  
+    }  
+
+    res.status(200).send(formattedScript);  
+    
+  } catch (e) {  
+    res.status(400).send(e);  
+  }  
 };
-exports.getDropDownMasterInweekOfYear = async (req, res) => {
-  try {
-    const getweekOfYear = await surnamesModel.find().distinct("weekOfYear");
-    if (getweekOfYear) {
-      res.status(200).send(getweekOfYear);
-    } else {
-      res.status(404).send({
-        message: "No Data Found!",
-      });
-    }
-  } catch (e) {
-    res.status(400).send(e);
-  }
+exports.getDropDownMasterInweekOfYear = async (req, res) => {  
+  try {  
+    const getweekOfYear = await surnamesModel.find().distinct("weekOfYear");  
+    
+    // Replace null values with "NIL"  
+    const formattedWeekOfYear = getweekOfYear.map(weekOfYear => weekOfYear === null || weekOfYear === "" ? "NIL" : weekOfYear);  
+    
+    // If the resulting array is empty, add "NIL"  
+    if (formattedWeekOfYear.length === 0) {  
+      formattedWeekOfYear.push("NIL");  
+    }  
+
+    res.status(200).send(formattedWeekOfYear);  
+    
+  } catch (e) {  
+    res.status(400).send(e);  
+  }  
 };
 exports.getTranslations = async (req, res) => {
   try {
@@ -3581,35 +3593,38 @@ exports.getTranslations = async (req, res) => {
     res.status(400).send(e);
   }
 };
-exports.getDropDownMasterInAssignTo = async (req, res) => {
-  try {
-    // Find distinct 'assignTo' values
-    const distinctAssignToValues = await surnamesModel.distinct("assignTo");
-    console.log(distinctAssignToValues);
+exports.getDropDownMasterInAssignTo = async (req, res) => {  
+  try {  
+    // Find distinct 'assignTo' values  
+    const distinctAssignToValues = await surnamesModel.distinct("assignTo");  
+    console.log(distinctAssignToValues);  
 
-    let users = [];
+    let users = [];  
 
-    if (distinctAssignToValues.includes(null)) {
-      users.push(null);
-    }
-    if (distinctAssignToValues !== null) {
-      users = users.concat(
-        await pdUser.find({ _id: { $in: distinctAssignToValues } })
-      );
-    }
-    console.log(users);
+    // Check for null and push "NIL" if found  
+    if (distinctAssignToValues.includes(null)) {  
+      users.push("NIL");  
+    }  
 
-    if (users.length > 0) {
-      res.status(200).send(users);
-    } else {
-      res.status(404).send({
-        message: "No User Data Found!",
-      });
-    }
-  } catch (e) {
-    console.log(e);
-    res.status(400).send(e);
-  }
+    // Fetch users if distinctAssignToValues is not empty  
+    if (distinctAssignToValues.length > 0) {  
+      const fetchedUsers = await pdUser.find({ _id: { $in: distinctAssignToValues } });  
+      users = users.concat(fetchedUsers);  
+    }  
+
+    console.log(users);  
+
+    // If no users are found, add "NIL" to the response if users array is still empty  
+    if (users.length === 0) {  
+      users.push("NIL");  
+    }  
+
+    res.status(200).send(users);  
+    
+  } catch (e) {  
+    console.log(e);  
+    res.status(400).send(e);  
+  }  
 };
 
 exports.getSurnameDetails = async (req, res) => {
