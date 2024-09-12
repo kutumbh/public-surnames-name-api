@@ -27,7 +27,7 @@ mongoose.connection.on('error', error => {
     console.error('MongoDB Error: ' + error)
 })
 
-const MONGODB_URL = process.env.MONGODB_URL || "mongodb://kutumbh:kutumbh123@kutumbh-shard-00-00.nvfjg.mongodb.net:27017,kutumbh-shard-00-01.nvfjg.mongodb.net:27017,kutumbh-shard-00-02.nvfjg.mongodb.net:27017/kutumbh-test?ssl=true&replicaSet=atlas-bj8tuw-shard-0&authSource=admin&retryWrites=true&w=majority";
+const MONGODB_URL = process.env.MONGODB_URL || "mongodb+srv://data-ingestion-G:data-ingestion-G@imeuswe-data.xvw0h.mongodb.net/kutumbh?retryWrites=true&w=majority"
 
 
 const run = async() => {
