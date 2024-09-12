@@ -3474,9 +3474,11 @@ exports.getSurnameById = async (req, res) => {
         getSurname.isPublished = "Published";
       } else if (getSurname.isPublished === "N") {
         getSurname.isPublished = "Not Published";
-      } else if (getSurname.isPublished === "B") {
-        getSurname.isPublished = "Block";
-      }
+      } else if(getname.isPublished==="R"){
+        getname.isPublished='Ready To Publish'
+    }  else if(getname.isPublished==="I"){
+      getname.isPublished='Invalid'
+    }
       res.status(201).send(getSurname);
     } else {
       res.status(404).send({ message: "No Data found" });
@@ -3531,14 +3533,15 @@ exports.getDropDownMasterInReligion = async (req, res) => {
     const getReligion = await surnamesModel.find().distinct("religion");  
     
     // Replace null values with "NIL"  
-    const formattedReligion = getReligion.map(religion => religion === null || religion === "" ? "NIL" : religion);  
+    const formattedReligion = getReligion.map(religion => religion == null || religion == "" ? "NIL" : religion);  
     
     // If the resulting array is empty, add "NIL"  
     if (formattedReligion.length === 0) {  
       formattedReligion.push("NIL");  
     }  
+    const set = [...new Set(formattedReligion)];
 
-    res.status(200).send(formattedReligion);  
+    res.status(200).send(set);  
     
   } catch (e) {  
     res.status(400).send(e);  
@@ -3549,14 +3552,16 @@ exports.getDropDownMasterInScript = async (req, res) => {
     const getScript = await surnamesModel.find().distinct("script");  
     
     // Replace null values with "NIL"  
-    const formattedScript = getScript.map(script => script === null || script === "" ? "NIL" : script);  
+    const formattedScript = getScript.map(script => script == null || script == "" ? "NIL" : script);  
     
     // If the resulting array is empty, add "NIL"  
     if (formattedScript.length === 0) {  
       formattedScript.push("NIL");  
     }  
+    const set = [...new Set(formattedScript)];
 
-    res.status(200).send(formattedScript);  
+
+    res.status(200).send(set);  
     
   } catch (e) {  
     res.status(400).send(e);  
@@ -3567,14 +3572,17 @@ exports.getDropDownMasterInweekOfYear = async (req, res) => {
     const getweekOfYear = await surnamesModel.find().distinct("weekOfYear");  
     
     // Replace null values with "NIL"  
-    const formattedWeekOfYear = getweekOfYear.map(weekOfYear => weekOfYear === null || weekOfYear === "" ? "NIL" : weekOfYear);  
+    const formattedWeekOfYear = getweekOfYear.map(weekOfYear => weekOfYear == null || weekOfYear == "" ? "NIL" : weekOfYear);
+    
+  
     
     // If the resulting array is empty, add "NIL"  
     if (formattedWeekOfYear.length === 0) {  
       formattedWeekOfYear.push("NIL");  
     }  
+    const set = [...new Set(formattedWeekOfYear)];
 
-    res.status(200).send(formattedWeekOfYear);  
+    res.status(200).send(set);  
     
   } catch (e) {  
     res.status(400).send(e);  
@@ -3620,7 +3628,10 @@ exports.getDropDownMasterInAssignTo = async (req, res) => {
       users.push("NIL");  
     }  
 
-    res.status(200).send(users);  
+    const set = [...new Set(users)];
+
+
+    res.status(200).send(set);  
     
   } catch (e) {  
     console.log(e);  
