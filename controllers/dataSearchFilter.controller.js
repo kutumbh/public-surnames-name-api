@@ -1,6 +1,6 @@
 const surnamesModel = require("../models/surname.model");
-const surnameDetailsModel=require("../models/surnamedetails.model");
-const surnamesstates1Model=require("../models/surnamesstates1.model");
+const surnameDetailsModel = require("../models/surnamedetails.model");
+const surnamesstates1Model = require("../models/surnamesstates1.model");
 const religionModel = require("../models/religion.model");
 const communityModel = require("../models/community.model");
 const scriptModel = require("../models/script.model");
@@ -13,7 +13,7 @@ const ITEM_PER_PAGE = 10;
 const _ = require("lodash");
 require("dotenv").config();
 
-// 
+//
 // exports.getSearchFilterData = async (req, res) => {
 //   try {
 //     const religions = req.body.religion || [];
@@ -82,8 +82,7 @@ require("dotenv").config();
 //         {
 //           $limit: pageSize,
 //         },
-      
-        
+
 //     ]);
 //     const totalCount = await surnamesModel.countDocuments(matchConditions);
 
@@ -108,29 +107,28 @@ exports.getSearchFilterData = async (req, res) => {
     const sStatuss = req.body.sStatus || [];
     const assignTo = req.body.assignTo || [];
     const weekOfYear = req.body.weekOfYear || [];
-    const dynamic_search=req.body.dynamic_search||""
+    const dynamic_search = req.body.dynamic_search || "";
     if (
       religions.length === 0 &&
       scripts.length === 0 &&
       searchText === "" &&
       sStatuss.length === 0 &&
       assignTo.length === 0 &&
-      weekOfYear.length=== 0&&
+      weekOfYear.length === 0 &&
       dynamic_search === ""
     ) {
       const responseObj = {
         totalItems: 0,
         data: [], // You can include other data properties as needed
-      }
+      };
       // Send an empty response with a status code of 200
       return res.status(200).json(responseObj);
-    };
-    
+    }
 
-    const aggregationPipeline=[];
+    const aggregationPipeline = [];
     const statematchCondition = {};
-    if (searchText!=="") {
-      aggregationPipeline.unshift({        
+    if (searchText !== "") {
+      aggregationPipeline.unshift({
         $search: {
           index: "fuzzy3",
           compound: {
@@ -146,11 +144,11 @@ exports.getSearchFilterData = async (req, res) => {
                   query: searchText,
                   path: "alternative",
                 },
-              }
+              },
             ],
           },
-        }
-      } )
+        },
+      });
       // aggregationPipeline.push({
       //   $match: {
       //         $or: [
@@ -158,8 +156,7 @@ exports.getSearchFilterData = async (req, res) => {
       //           { alternative: { $in: [searchText] } }
       //         ]
       //       }})
-    
-    
+
       // aggregationPipeline.push({
       // $match: {
       //       $or: [
@@ -167,164 +164,202 @@ exports.getSearchFilterData = async (req, res) => {
       //         { alternative: { $in: [searchText] } }
       //       ]
       //     }})
-    
     }
-  let sortField = null;
+    let sortField = null;
     const matchConditions = {};
     if (religions.length > 0) {
       //aggregationPipeline.push({ $unwind: "$religion" });
-      matchConditions.religion = { $in: religions};
+      if (religions.includes("NIL")) {
+        religions.splice(religions.indexOf("NIL"), 1);
+        religions.push(null, "");
+      }
+      matchConditions.religion = { $in: religions };
     }
     if (scripts.length > 0) {
       //aggregationPipeline.push({ $unwind: "$script" });
+      if (scripts.includes("NIL")) {
+        scripts.splice(scripts.indexOf("NIL"), 1);
+        scripts.push(null, "");
+      }
       matchConditions.script = { $in: scripts };
     }
     if (sStatuss.length > 0) {
-      if(sStatuss.includes("SN")||sStatuss.includes("SV")||sStatuss.includes("SS")||sStatuss.includes("ST")||sStatuss.includes("CU")){
-      matchConditions.sStatus = { $in: sStatuss };
+      if (
+        sStatuss.includes("SN") ||
+        sStatuss.includes("SV") ||
+        sStatuss.includes("SS") ||
+        sStatuss.includes("ST") ||
+        sStatuss.includes("CU")
+      ) {
+        matchConditions.sStatus = { $in: sStatuss };
       }
-      if(sStatuss.includes('Y')||sStatuss.includes('N')||sStatuss.includes('B')){
-        matchConditions.isPublished={$in:sStatuss}
+      if (
+        sStatuss.includes("Y") ||
+        sStatuss.includes("N") ||
+        sStatuss.includes("B")
+      ) {
+        matchConditions.isPublished = { $in: sStatuss };
       }
-    
     }
     if (assignTo.length > 0) {
-      if (assignTo.includes(null)) {
-        // Handle the case where "null" is selected
-        matchConditions.assignTo = { $in: [null, ...assignTo.filter(id => id !== null).map(id => mongoose.Types.ObjectId(id))] };
-      } else {
-        // Handle the case where specific values are selected
-        const assignToIds = assignTo.map((id) => mongoose.Types.ObjectId(id));
-        matchConditions.assignTo = { $in: assignToIds };
+      if (assignTo.includes("NIL")) {
+        assignTo.splice(assignTo.indexOf("NIL"), 1);
+        assignTo.push(null, "");
       }
+      const assignToIds = assignTo.map((id) => {
+        if (id != null && id != "") {
+          return mongoose.Types.ObjectId(id);
+        } else if (id == null) {
+          return null;
+        } else {
+          return "";
+        }
+      });
+      matchConditions.assignTo = { $in: assignToIds };
     }
-    if (weekOfYear.length>0) {
+    if (weekOfYear.length > 0) {
+      if (weekOfYear.includes("NIL")) {
+        weekOfYear.splice(weekOfYear.indexOf("NIL"), 1);
+        weekOfYear.push(null, "");
+      }
       matchConditions.weekOfYear = { $in: weekOfYear };
     }
-    aggregationPipeline.push(
-      {$match:matchConditions},      
-    );
+    aggregationPipeline.push({ $match: matchConditions });
     if (dynamic_search !== "") {
-      
       const operatorMapping = {
         ">": "$gt",
         ">=": "$gte",
         "<": "$lt",
         "<=": "$lte",
-        "start": "start",
+        start: "start",
         "=": "=",
-        "Ends": "Ends",
-        "length>":"length>",
-        "length<":"length<",
-        "contains":"contains",
-        
+        Ends: "Ends",
+        "length>": "length>",
+        "length<": "length<",
+        contains: "contains",
       };
-    
+
       const cleanedDynamicSearch = dynamic_search.replace(/^"|"$/g, "");
-    
+
       const conditions = cleanedDynamicSearch.split(",").filter(Boolean);
-      
 
-conditions.forEach((condition) => {
-  let [field, operator, value] = condition.split(/\s*(=|>=|<=|<|>|length>|length<|start|Ends|contains)\s*/);
-  if (field && operator && value && operatorMapping[operator]) {
-    const matchCondition = {};
-    
+      conditions.forEach((condition) => {
+        let [field, operator, value] = condition.split(
+          /\s*(=|>=|<=|<|>|length>|length<|start|Ends|contains)\s*/
+        );
+        if (field && operator && value && operatorMapping[operator]) {
+          const matchCondition = {};
 
-    if (operator === "start") {
-      matchCondition[field] = {
-        $regex: `^${value}`,
-        $options: "i",
-      };
-    }  
-    if (operator === '='&& field !== 'state' && field !== 'place count') {
-      if (!isNaN(parseFloat(value))) {
-        matchCondition[field] = parseFloat(value);
-      } else {
-        matchCondition[field] = { $regex: new RegExp(`^${value}$`, 'i') };
-      }
-    } 
-     if (operator === 'Ends') {
-      matchCondition[field] = { $regex: new RegExp(`${value}$`, 'i') };
-    } 
-     if (operator === "length>") {
-      const lengthMatch = {
-        $match: {
-          [field]: { $exists: true },
-          $expr: { $gt: [{ $strLenCP: `$${field}` }, parseFloat(value)] },
-        },
-      };
-      aggregationPipeline.push(lengthMatch);
-    } 
-    if (operator === "length<") {
-      const lengthMatch = {
-        $match: {
-          [field]: { $exists: true },
-          $expr: { $lt: [{ $strLenCP: `$${field}` }, parseFloat(value)] },
-        },
-      };
-      aggregationPipeline.push(lengthMatch);
-    } 
-    if (operator === '>' && field !== 'state' && field !== 'place count') {
-      matchCondition[field] = { $gt: parseFloat(value) };
-      sortField = field;
-    } 
-     if (operator === '<' && field !== 'state' && field !== 'place count') {
-      matchCondition[field] = { $lt: parseFloat(value) };
-      sortField = field;
-    } 
-     if (operator === '>=' && field !== 'state') {
-      matchCondition[field] = { $gte: parseFloat(value) };
-      sortField = field;
-    }
-     if (operator === '<=' && field !== 'state') {
-      matchCondition[field] = { $lte: parseFloat(value) };
-      sortField = field;
-    } 
-    if (operator === 'contains') {
-      matchCondition[field] = { $regex: new RegExp(`${value}`, 'i') };
-    } 
-     if (field === 'state') {
-      if (operator === '=') {
-        statematchCondition['states.stateCode'] = { $regex: new RegExp(`${value}`, 'i') };
-      }
-    }
-     if (field === 'place count') {
-      if (operator === '>') {
-        statematchCondition['place.count'] = { $gt: parseFloat(value) };
-      } else if (operator === '<') {
-        statematchCondition['place.count'] = { $lt: parseFloat(value) };
-      }
-    }
+          if (operator === "start") {
+            matchCondition[field] = {
+              $regex: `^${value}`,
+              $options: "i",
+            };
+          }
+          if (
+            operator === "=" &&
+            field !== "state" &&
+            field !== "place count"
+          ) {
+            if (!isNaN(parseFloat(value))) {
+              matchCondition[field] = parseFloat(value);
+            } else {
+              matchCondition[field] = { $regex: new RegExp(`^${value}$`, "i") };
+            }
+          }
+          if (operator === "Ends") {
+            matchCondition[field] = { $regex: new RegExp(`${value}$`, "i") };
+          }
+          if (operator === "length>") {
+            const lengthMatch = {
+              $match: {
+                [field]: { $exists: true },
+                $expr: { $gt: [{ $strLenCP: `$${field}` }, parseFloat(value)] },
+              },
+            };
+            aggregationPipeline.push(lengthMatch);
+          }
+          if (operator === "length<") {
+            const lengthMatch = {
+              $match: {
+                [field]: { $exists: true },
+                $expr: { $lt: [{ $strLenCP: `$${field}` }, parseFloat(value)] },
+              },
+            };
+            aggregationPipeline.push(lengthMatch);
+          }
+          if (
+            operator === ">" &&
+            field !== "state" &&
+            field !== "place count"
+          ) {
+            matchCondition[field] = { $gt: parseFloat(value) };
+            sortField = field;
+          }
+          if (
+            operator === "<" &&
+            field !== "state" &&
+            field !== "place count"
+          ) {
+            matchCondition[field] = { $lt: parseFloat(value) };
+            sortField = field;
+          }
+          if (operator === ">=" && field !== "state") {
+            matchCondition[field] = { $gte: parseFloat(value) };
+            sortField = field;
+          }
+          if (operator === "<=" && field !== "state") {
+            matchCondition[field] = { $lte: parseFloat(value) };
+            sortField = field;
+          }
+          if (operator === "contains") {
+            matchCondition[field] = { $regex: new RegExp(`${value}`, "i") };
+          }
+          if (field === "state") {
+            if (operator === "=") {
+              statematchCondition["states.stateCode"] = {
+                $regex: new RegExp(`${value}`, "i"),
+              };
+            }
+          }
+          if (field === "place count") {
+            if (operator === ">") {
+              statematchCondition["place.count"] = { $gt: parseFloat(value) };
+            } else if (operator === "<") {
+              statematchCondition["place.count"] = { $lt: parseFloat(value) };
+            }
+          }
 
-    if (Object.keys(matchCondition).length > 0) {
-      aggregationPipeline.push({
-        $match: matchCondition,
+          if (Object.keys(matchCondition).length > 0) {
+            aggregationPipeline.push({
+              $match: matchCondition,
+            });
+          }
+        }
       });
     }
-  }
-});
-    } 
-    if (Object.keys(statematchCondition).length > 0){
-      const surnameFilter = await surnamesstates1Model.aggregate([
-        {
-          $match: statematchCondition,
-        },
-        {
-          $project: {
-            _id: 0,
-            surname: 1,
+    if (Object.keys(statematchCondition).length > 0) {
+      const surnameFilter = await surnamesstates1Model
+        .aggregate([
+          {
+            $match: statematchCondition,
           },
-        },
-      ]).limit(10000)
+          {
+            $project: {
+              _id: 0,
+              surname: 1,
+            },
+          },
+        ])
+        .limit(10000);
       // console.log('surname print',surnameFilter)
       if (surnameFilter.length > 0) {
-        const matchedLastNames = surnameFilter.map((entry) => entry.surname);     
-        // console.log(matchedLastNames) 
+        const matchedLastNames = surnameFilter.map((entry) => entry.surname);
+        // console.log(matchedLastNames)
         aggregationPipeline.push({
           $match: {
-            surname: { $in: matchedLastNames }
-          }
+            surname: { $in: matchedLastNames },
+          },
         });
       }
     }
@@ -343,130 +378,144 @@ conditions.forEach((condition) => {
       });
     }
     const countPipeline = [
-      ...aggregationPipeline, 
+      ...aggregationPipeline,
       {
-        $count: "totalCount"
-      }
+        $count: "totalCount",
+      },
     ];
-            aggregationPipeline.push({
-              $lookup: {
-                from: "pdUsers", // The name of the collection to join
-                localField: "assignTo", // The field from your current collection
-                foreignField: "_id", // The field from the "pdUsers" collection
-                as: "assignTo", // The name of the output array
-              },
-            });
-            if(sortField !== "pd_count"){
-            aggregationPipeline.push({     
-              $sort: {surname: 1 }})
-            }
-            aggregationPipeline.push({
-              $project: {
-                _id:1,
-                community: 1,
-                gotra: 1,
-                religion: 1,
-                script: 1,
-                surname: 1,
-                rank:1,
-                sStatus: 1,          
-                weekOfYear: 1,
-                assignTo: {
-                  _id: "$assignTo._id",
-                  fname: "$assignTo.fname"
-                },
-                pd_count:1,
-                updatedAt:1,
-                isPublished:1
-              },
-            });
-            
-            const [countResult] = await surnamesModel.aggregate(countPipeline).allowDiskUse(true);;
-            
-            const totalCount = countResult ? countResult.totalCount : 0;
-            const skip = (page - 1) * itemsPerPage;
-            aggregationPipeline.push({ $skip: skip });
-            aggregationPipeline.push({ $limit: itemsPerPage });
-            const filteredUsers = await surnamesModel.aggregate(aggregationPipeline)
+    aggregationPipeline.push({
+      $lookup: {
+        from: "pdUsers", // The name of the collection to join
+        localField: "assignTo", // The field from your current collection
+        foreignField: "_id", // The field from the "pdUsers" collection
+        as: "assignTo", // The name of the output array
+      },
+    });
+    if (sortField !== "pd_count") {
+      aggregationPipeline.push({
+        $sort: { surname: 1 },
+      });
+    }
+    aggregationPipeline.push({
+      $project: {
+        _id: 1,
+        community: 1,
+        gotra: 1,
+        religion: 1,
+        script: 1,
+        surname: 1,
+        rank: 1,
+        sStatus: 1,
+        weekOfYear: 1,
+        assignTo: {
+          _id: "$assignTo._id",
+          fname: "$assignTo.fname",
+        },
+        pd_count: 1,
+        updatedAt: 1,
+        isPublished: 1,
+      },
+    });
 
+    const [countResult] = await surnamesModel
+      .aggregate(countPipeline)
+      .allowDiskUse(true);
 
+    const totalCount = countResult ? countResult.totalCount : 0;
+    const skip = (page - 1) * itemsPerPage;
+    aggregationPipeline.push({ $skip: skip });
+    aggregationPipeline.push({ $limit: itemsPerPage });
+    const filteredUsers = await surnamesModel.aggregate(aggregationPipeline);
 
-            const totalPages = Math.ceil(totalCount / itemsPerPage);
-            res.status(200).send({filteredUsers,
-              totalPages: totalPages,
-              totalItems:totalCount ,
-            });
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
+    res
+      .status(200)
+      .send({ filteredUsers, totalPages: totalPages, totalItems: totalCount });
   } catch (e) {
-    console.log(e)
+    console.log(e);
     res.status(400).send(e);
   }
 };
 
 exports.getCountsOfSurname = async (req, res) => {
   try {
-    const script = req.body.script||[];
-    const religion = req.body.religion||[];
-    const assignTo = req.body.assignTo||[];
-    const sStatus = req.body.sStatus||[];
-    const weekOfYear=req.body.weekOfYear||[];
+    const script = req.body.script || [];
+    const religion = req.body.religion || [];
+    const assignTo = req.body.assignTo || [];
+    const sStatus = req.body.sStatus || [];
+    const weekOfYear = req.body.weekOfYear || [];
     const searchText = req.body.searchText.toUpperCase() || "";
-    const dynamic_search=req.body.dynamic_search||""
-    
+    const dynamic_search = req.body.dynamic_search || "";
+
     if (
       religion.length === 0 &&
       script.length === 0 &&
       searchText === "" &&
       sStatus.length === 0 &&
       assignTo.length === 0 &&
-      weekOfYear.length=== 0&&
+      weekOfYear.length === 0 &&
       dynamic_search === ""
     ) {
       // Send an empty response with a status code of 200
       return res.status(200).send([]);
     }
-    const aggregationPipeline=[];
+    const aggregationPipeline = [];
     const statematchCondition = {};
     const matchConditions = {};
-    if (searchText!=="") {
+    if (searchText !== "") {
       aggregationPipeline.unshift({
-          $search: {
-              index: "fuzzy3",
-              compound: {
-                should: [
-                   {
-                    autocomplete: {
-                      query: searchText,
-                      path: "surname", },
-                      // fuzzy: {
-                      //   prefixLength: 1,
-                      //   maxEdits: 1,
-                      //   maxExpansions: 256,
-                      // },
-                  },
-                  // {
-                  //   autocomplete: {
-                  //     query: searchText,
-                  //     path: "community", }
-                  // }
-                ]
-              }
-          }
+        $search: {
+          index: "fuzzy3",
+          compound: {
+            should: [
+              {
+                autocomplete: {
+                  query: searchText,
+                  path: "surname",
+                },
+                // fuzzy: {
+                //   prefixLength: 1,
+                //   maxEdits: 1,
+                //   maxExpansions: 256,
+                // },
+              },
+              // {
+              //   autocomplete: {
+              //     query: searchText,
+              //     path: "community", }
+              // }
+            ],
+          },
+        },
       });
-      aggregationPipeline.push({
-        
-        $match: {
-          $or: [
-            { surname: searchText },
-            { alternative: { $in: [searchText] } }
-          ]
-        }
-      })
-  }
+      // aggregationPipeline.push({
+      //   $match: {
+      //     $or: [
+      //       { surname: searchText },
+      //       { alternative: { $in: [searchText] } },
+      //     ],
+      //   },
+      // });
+    }
     if (religion.length > 0) {
-      aggregationPipeline.push({ $unwind: "$religion" });
-      matchConditions.religion = { $in: religion};
+      if (religion.includes("NIL")) {
+        religion.splice(religion.indexOf("NIL"), 1);
+        religion.push(null, "");
+      }
+      console.log("religion", religion);
+      aggregationPipeline.push({
+        $unwind: {
+          path: "$religion",
+          preserveNullAndEmptyArrays: true // Ensures null or empty values remain
+        }
+      });
+      matchConditions.religion = { $in: religion };
     }
     if (script.length > 0) {
+      if (script.includes("NIL")) {
+        script.splice(script.indexOf("NIL"), 1);
+        script.push(null, "");
+      }
       aggregationPipeline.push({ $unwind: "$script" });
       matchConditions.script = { $in: script };
     }
@@ -474,118 +523,144 @@ exports.getCountsOfSurname = async (req, res) => {
       matchConditions.sStatus = { $in: sStatus };
     }
     if (assignTo.length > 0) {
-      const assignToIds = assignTo.map((id) => mongoose.Types.ObjectId(id));
+      if (assignTo.includes("NIL")) {
+        assignTo.splice(assignTo.indexOf("NIL"), 1);
+        assignTo.push(null, "");
+      }
+      const assignToIds = assignTo.map((id) => {
+        if (id != null && id != "") {
+          return mongoose.Types.ObjectId(id);
+        } else if (id == null) {
+          return null;
+        } else {
+          return "";
+        }
+      });
       matchConditions.assignTo = { $in: assignToIds };
     }
-    if (weekOfYear.length>0) {
+    if (weekOfYear.length > 0) {
+      if (weekOfYear.includes("NIL")) {
+        weekOfYear.splice(weekOfYear.indexOf("NIL"), 1);
+        weekOfYear.push(null, "");
+      }
       matchConditions.weekOfYear = { $in: weekOfYear };
     }
-    aggregationPipeline.push(
-      {$match:matchConditions},      
-    );
+    aggregationPipeline.push({ $match: matchConditions });
     if (dynamic_search !== "") {
-      
       const operatorMapping = {
         ">": "$gt",
         ">=": "$gte",
         "<": "$lt",
         "<=": "$lte",
-        "start": "start",
+        start: "start",
         "=": "=",
-        "Ends": "Ends",
-        "length>":"length>",
-        "length<":"length<",
-        "contains":"contains",
-        
+        Ends: "Ends",
+        "length>": "length>",
+        "length<": "length<",
+        contains: "contains",
       };
-    
+
       const cleanedDynamicSearch = dynamic_search.replace(/^"|"$/g, "");
-    
+
       const conditions = cleanedDynamicSearch.split(",").filter(Boolean);
-      
 
-conditions.forEach((condition) => {
-  let [field, operator, value] = condition.split(/\s*(=|>=|<=|<|>|length>|length<|start|Ends|contains)\s*/);
-  if (field && operator && value && operatorMapping[operator]) {
-    console.log(field, operator, value)
-    const matchCondition = {};
-    
+      conditions.forEach((condition) => {
+        let [field, operator, value] = condition.split(
+          /\s*(=|>=|<=|<|>|length>|length<|start|Ends|contains)\s*/
+        );
+        if (field && operator && value && operatorMapping[operator]) {
+          // console.log(field, operator, value)
+          const matchCondition = {};
 
-    if (operator === "start") {
-      matchCondition[field] = {
-        $regex: `^${value}`,
-        $options: "i",
-      };
-    }  
-    if (operator === '='&& field !== 'state' && field !== 'place count') {
-      if (!isNaN(parseFloat(value))) {
-        matchCondition[field] = parseFloat(value);
-      } else {
-        matchCondition[field] = { $regex: new RegExp(`^${value}$`, 'i') };
-      }
-    } 
-     if (operator === 'Ends') {
-      matchCondition[field] = { $regex: new RegExp(`${value}$`, 'i') };
-    } 
-     if (operator === "length>") {
-      const lengthMatch = {
-        $match: {
-          [field]: { $exists: true },
-          $expr: { $gt: [{ $strLenCP: `$${field}` }, parseFloat(value)] },
-        },
-      };
-      aggregationPipeline.push(lengthMatch);
-    } 
-    if (operator === "length<") {
-      const lengthMatch = {
-        $match: {
-          [field]: { $exists: true },
-          $expr: { $lt: [{ $strLenCP: `$${field}` }, parseFloat(value)] },
-        },
-      };
-      aggregationPipeline.push(lengthMatch);
-    } 
-    if (operator === '>' && field !== 'state' && field !== 'place count') {
-      matchCondition[field] = { $gt: parseFloat(value) };
-      sortField = field;
-    } 
-     if (operator === '<' && field !== 'state' && field !== 'place count') {
-      matchCondition[field] = { $lt: parseFloat(value) };
-      sortField = field;
-    } 
-     if (operator === '>=' && field !== 'state') {
-      matchCondition[field] = { $gte: parseFloat(value) };
-      sortField = field;
-    }
-     if (operator === '<=' && field !== 'state') {
-      matchCondition[field] = { $lte: parseFloat(value) };
-      sortField = field;
-    } 
-    if (operator === 'contains') {
-      matchCondition[field] = { $regex: new RegExp(`${value}`, 'i') };
-    } 
-     if (field === 'state') {
-      if (operator === '=') {
-        statematchCondition['place._id'] = { $regex: new RegExp(`${value}`, 'i') };
-      }
-    }
-     if (field === 'place count') {
-      if (operator === '>') {
-        statematchCondition['place.count'] = { $gt: parseFloat(value) };
-      } else if (operator === '<') {
-        statematchCondition['place.count'] = { $lt: parseFloat(value) };
-      }
-    }
+          if (operator === "start") {
+            matchCondition[field] = {
+              $regex: `^${value}`,
+              $options: "i",
+            };
+          }
+          if (
+            operator === "=" &&
+            field !== "state" &&
+            field !== "place count"
+          ) {
+            if (!isNaN(parseFloat(value))) {
+              matchCondition[field] = parseFloat(value);
+            } else {
+              matchCondition[field] = { $regex: new RegExp(`^${value}$`, "i") };
+            }
+          }
+          if (operator === "Ends") {
+            matchCondition[field] = { $regex: new RegExp(`${value}$`, "i") };
+          }
+          if (operator === "length>") {
+            const lengthMatch = {
+              $match: {
+                [field]: { $exists: true },
+                $expr: { $gt: [{ $strLenCP: `$${field}` }, parseFloat(value)] },
+              },
+            };
+            aggregationPipeline.push(lengthMatch);
+          }
+          if (operator === "length<") {
+            const lengthMatch = {
+              $match: {
+                [field]: { $exists: true },
+                $expr: { $lt: [{ $strLenCP: `$${field}` }, parseFloat(value)] },
+              },
+            };
+            aggregationPipeline.push(lengthMatch);
+          }
+          if (
+            operator === ">" &&
+            field !== "state" &&
+            field !== "place count"
+          ) {
+            matchCondition[field] = { $gt: parseFloat(value) };
+            sortField = field;
+          }
+          if (
+            operator === "<" &&
+            field !== "state" &&
+            field !== "place count"
+          ) {
+            matchCondition[field] = { $lt: parseFloat(value) };
+            sortField = field;
+          }
+          if (operator === ">=" && field !== "state") {
+            matchCondition[field] = { $gte: parseFloat(value) };
+            sortField = field;
+          }
+          if (operator === "<=" && field !== "state") {
+            matchCondition[field] = { $lte: parseFloat(value) };
+            sortField = field;
+          }
+          if (operator === "contains") {
+            matchCondition[field] = { $regex: new RegExp(`${value}`, "i") };
+          }
+          if (field === "state") {
+            if (operator === "=") {
+              statematchCondition["place._id"] = {
+                $regex: new RegExp(`${value}`, "i"),
+              };
+            }
+          }
+          if (field === "place count") {
+            if (operator === ">") {
+              statematchCondition["place.count"] = { $gt: parseFloat(value) };
+            } else if (operator === "<") {
+              statematchCondition["place.count"] = { $lt: parseFloat(value) };
+            }
+          }
 
-    if (Object.keys(matchCondition).length > 0) {
-      aggregationPipeline.push({
-        $match: matchCondition,
+          if (Object.keys(matchCondition).length > 0) {
+            aggregationPipeline.push({
+              $match: matchCondition,
+            });
+          }
+        }
       });
     }
-  }
-});
-    } 
-    if (Object.keys(statematchCondition).length > 0){
+    if (Object.keys(statematchCondition).length > 0) {
       const surnameFilter = await surnameDetailsModel.aggregate([
         {
           $match: statematchCondition,
@@ -596,13 +671,13 @@ conditions.forEach((condition) => {
             lastName: 1,
           },
         },
-      ])
+      ]);
       if (surnameFilter.length > 0) {
-        const matchedLastNames = surnameFilter.map((entry) => entry.lastName);      
+        const matchedLastNames = surnameFilter.map((entry) => entry.lastName);
         aggregationPipeline.push({
           $match: {
-            surname: { $in: matchedLastNames }
-          }
+            surname: { $in: matchedLastNames },
+          },
         });
       }
     }
@@ -638,6 +713,7 @@ conditions.forEach((condition) => {
     }
 
     aggregationPipeline.push(groupStage);
+    // console.log(JSON.stringify(aggregationPipeline));
 
     // Perform the MongoDB aggregation
     const result = await surnamesModel.aggregate(aggregationPipeline);
@@ -648,5 +724,3 @@ conditions.forEach((condition) => {
     res.status(500).json({ error: "An error occurred" });
   }
 };
-
-

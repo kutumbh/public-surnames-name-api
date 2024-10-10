@@ -3606,7 +3606,7 @@ exports.getDropDownMasterInAssignTo = async (req, res) => {
   try {  
     // Find distinct 'assignTo' values  
     const distinctAssignToValues = await surnamesModel.distinct("assignTo");  
-    console.log(distinctAssignToValues);  
+    // console.log(distinctAssignToValues);  
 
     let users = [];  
 
@@ -3621,7 +3621,7 @@ exports.getDropDownMasterInAssignTo = async (req, res) => {
       users = users.concat(fetchedUsers);  
     }  
 
-    console.log(users);  
+    // console.log(users);  
 
     // If no users are found, add "NIL" to the response if users array is still empty  
     if (users.length === 0) {  
