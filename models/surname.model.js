@@ -135,6 +135,14 @@ const surnameSchema = new mongoose.Schema(
       ref: "pdUser",
       required: false,
       default: null
+    },
+    likeCount: {
+      type: Number,
+      default: 0
+    },
+    dislikeCount: {
+      type: Number,
+      default: 0
     }
   },
     {

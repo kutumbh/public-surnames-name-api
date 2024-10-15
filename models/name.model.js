@@ -73,6 +73,14 @@ const nameSchema = new mongoose.Schema(
       type: Date,
       trim: true,
     },
+    likeCount: {
+      type: Number,
+      default: 0
+    } ,
+    dislikeCount: {
+      type: Number,
+      default: 0
+    }
   },
   {
     timestamps: true

@@ -414,6 +414,8 @@ exports.getSearchFilterData = async (req, res) => {
         pd_count: 1,
         updatedAt: 1,
         isPublished: 1,
+        likeCount: 1,
+        dislikeCount: 1,
       },
     });
 
